@@ -226,15 +226,37 @@
     </div>
 
     <footer class="footer">
-        <p>Trường Đại học Kinh tế - Kỹ thuật Công nghiệp (UNETI)</p>
-        <p>Số điện thoại liên hệ: 0123456789 | Địa chỉ: Ngõ 454 Minh Khai, Hà Nội</p>
+        <p>Trường Đại học Trăm Măm</p>
+        <p>Số điện thoại liên hệ: 0123456789 | Địa chỉ: Không biết</p>
     </footer>
 
     <script>
         // ==========================================
         // KHAI BÁO BIẾN TOÀN CỤC (Thay thế URL nếu deploy bản mới trên GAS)
         // ==========================================
-        const API_URL = 'https://script.google.com/macros/s/AKfycbwXWZ3Dq7B-FOf1aZfBFh-7QT2e0jxJJV_NiFMH9Yy44oN8fzailn2tVQQQGrtrJmdLOg/exec';
+        const API_URL = 'https://script.google.com/macros/s/AKfycbxwpT3gwDXUD2byBv1sfq3IaJ9i7NLPE1WiNIfOT9Irt-I-8p-RMjh9CtwwZCrLahXPzg/exec';
+
+        // Hàm gọi API Đăng nhập
+        async function loginAPI(username, password) {
+            try {
+                const loader = document.getElementById('loader');
+                if (loader) loader.classList.remove('hidden');
+            
+                const payload = { action: 'login', username: username, password: password };
+                const response = await fetch(API_URL, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'text/plain;charset=utf-8' },
+                    body: JSON.stringify(payload)
+                });
+                return await response.json();
+            } catch (error) {
+                console.error("Lỗi Login:", error);
+                return { status: "error", message: "Lỗi kết nối máy chủ" };
+            } finally {
+                const loader = document.getElementById('loader');
+                if (loader) loader.classList.add('hidden');
+            }
+        }
 
         // ==========================================
         // HÀM FETCH DỮ LIỆU TỪ SERVER BẰNG VANILLA JS
