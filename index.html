@@ -238,8 +238,11 @@
                             <tr>
                                 <th>Mã SV</th>
                                 <th>Tên SV</th>
+                                <th>Toán</th>
+                                <th>Văn</th>
                                 <th>Điểm hệ 10</th>
                                 <th>Điểm hệ 4</th>
+                                <th>Điểm chữ</th>
                                 <th>Trạng thái</th>
                                 <th>Hành động</th>
                             </tr>
@@ -267,30 +270,30 @@
         // ==========================================
         // CẤU HÌNH API GOOGLE SHEETS
         // ==========================================
-        const API_URL = 'https://script.google.com/macros/s/AKfycbzZHvEbRiBeUkcEu4WB9ZatKrqCk4_C2lnRqCvprSWccETK-qGPFMPR9ws0afdhy-HyvA/exec';
+
+        const API_URL = 'https://script.google.com/macros/s/AKfycbyC2mTDBkx2hj8VDjm-W2Kuk14yu-bDv7e48kYnFrdTdSf4r18B5ajqsrDfqaqa96KCBA/exec';
 
         // ==========================================
-        // LOGIC KHỞI ĐỘNG VÀ ĐĂNG NHẬP
+        // LOGIC KHỞI ĐỘNG VÀ ĐĂNG NHẬP (ĐÃ TỐI ƯU TỐC ĐỘ)
         // ==========================================
         window.onload = function() {
             const savedUser = localStorage.getItem('currentUser');
             if(savedUser) {
                 document.getElementById('login-screen').style.display = 'none';
                 updateDashboard();
+                preloadData(); // Đã bổ sung gọi tải ngầm dữ liệu
             } else {
                 document.getElementById('login-screen').style.display = 'flex';
             }
         };
 
+        // Đổi từ POST sang GET để tránh lỗi redirect của Google
         async function loginAPI(username, password) {
             try {
                 toggleLoader(true);
-                const payload = { action: 'login', username: username, password: password };
-                const response = await fetch(API_URL, {
-                    method: 'POST',
-                    headers: { 'Content-Type': 'text/plain;charset=utf-8' },
-                    body: JSON.stringify(payload)
-                });
+                // Truyền thẳng tài khoản/mật khẩu lên URL (GET Request)
+                const url = `${API_URL}?action=login&username=${encodeURIComponent(username)}&password=${encodeURIComponent(password)}`;
+                const response = await fetch(url);
                 return await response.json();
             } catch (error) {
                 console.error("Lỗi Login:", error);
@@ -315,12 +318,15 @@
                 localStorage.setItem('currentUser', JSON.stringify(result.user));
                 showAlert(`Chào mừng ${result.user.fullName}!`, 'success');
                 document.getElementById('login-screen').style.display = 'none';
+                
                 updateDashboard();
                 showTab('dashboard');
+                preloadData(); // Đã bổ sung gọi tải ngầm ngay sau khi đăng nhập
             } else {
                 showAlert(result.message, 'error');
             }
         }
+    
 
         function updateDashboard() {
             const userDataStr = localStorage.getItem('currentUser');
@@ -428,9 +434,13 @@
                 const tr = document.createElement('tr');
                 const maSV = student['Mã SV'] || student['MaSV'] || ''; 
                 const tenSV = student['Tên SV'] || student['TenSV'] || '';
+                const diemToan = student['Điểm Toán'] || student['DiemToan'] || '';
+                const diemVan = student['Điểm Văn'] || student['DiemVan'] || '';
                 const diem10 = student['Điểm hệ 10'] || student['Diem10'] || '';
                 const diem4 = student['Điểm hệ 4'] || student['Diem4'] || '';
+                const diemChu = student['Điểm chữ'] || student['DiemChu'] || '';
                 const trangThai = student['Trạng thái'] || student['TrangThai'] || 'Bình thường';
+                const hanhDong = student['Hành động'] || student['HanhDong'] || 'Học tiếp';
 
                 let badgeClass = '';
                 if(trangThai.toLowerCase().includes('cảnh cáo') || trangThai.toLowerCase().includes('chưa đóng')) {
@@ -442,9 +452,13 @@
                 tr.innerHTML = `
                     <td>${maSV}</td>
                     <td>${tenSV}</td>
+                    <td>${diemToan}</td>
+                    <td>${diemVan}</td>
                     <td>${diem10}</td>
                     <td>${diem4}</td>
+                    <td>${diemChu}</td>
                     <td><span class="${badgeClass}">${trangThai}</span></td>
+                    <td><span class="${badgeClass}">${hanhDong}</span></td>
                     <td>
                         <button onclick="showAlert('Đang mở chat với ${tenSV}', 'info')" style="padding: 6px 12px; cursor: pointer; border-radius: 4px; border: 1px solid #ccc; background: white; font-weight: bold;">
                             <i class="fas fa-comment"></i> Nhắn
@@ -512,6 +526,27 @@
                 return;
             }
             showAlert(`Đang tra cứu sinh viên: ${msv}`, 'info');
+        }
+
+        // HÀM TẢI NGẦM DỮ LIỆU
+        function preloadData() {
+            // 1. Tải ngầm Bảng điểm
+            fetch(`${API_URL}?action=getGrades`)
+                .then(response => response.json())
+                .then(result => {
+                    if (result.status === "success") {
+                        renderGradesTable(result.data);
+                    }
+                }).catch(err => console.log("Lỗi tải ngầm điểm:", err));
+            
+            // 2. Tải ngầm Danh sách sinh viên
+            fetch(`${API_URL}?action=getStudents`)
+                .then(response => response.json())
+                .then(result => {
+                    if (result.status === "success") {
+                        renderStudentsTable(result.data);
+                    }
+                }).catch(err => console.log("Lỗi tải ngầm sinh viên:", err));
         }
     </script>
 </body>
