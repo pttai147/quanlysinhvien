@@ -434,10 +434,10 @@
                 const tr = document.createElement('tr');
                 const maSV = student['Mã SV'] || student['MaSV'] || ''; 
                 const tenSV = student['Tên SV'] || student['TenSV'] || '';
-                const diemToan = student['Điểm Toán'] || student['DiemToan'] || '';
-                const diemVan = student['Điểm Văn'] || student['DiemVan'] || '';
-                const diem10 = student['Điểm hệ 10'] || student['Diem10'] || '';
-                const diem4 = student['Điểm hệ 4'] || student['Diem4'] || '';
+                const diemToan = student['Toán'] || student['Toan'] || '';
+                const diemVan = student['Văn'] || student['Van'] || '';
+                const diem10 = student['Điểm 10'] || student['Diem10'] || '';
+                const diem4 = student['Điểm 4'] || student['Diem4'] || '';
                 const diemChu = student['Điểm chữ'] || student['DiemChu'] || '';
                 const trangThai = student['Trạng thái'] || student['TrangThai'] || 'Bình thường';
                 const hanhDong = student['Hành động'] || student['HanhDong'] || 'Học tiếp';
@@ -448,7 +448,6 @@
                 } else if (trangThai.toLowerCase().includes('chưa đủ')) {
                     badgeClass = 'badge-warning';
                 }
-
                 tr.innerHTML = `
                     <td>${maSV}</td>
                     <td>${tenSV}</td>
